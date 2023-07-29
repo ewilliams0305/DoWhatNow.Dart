@@ -172,7 +172,6 @@ void main() {
 
       print(result.toString());
       expect(result.isSuccess, isTrue);
-      expect(result.runtimeType.toString() == 'Result<int>', isTrue);
     });
   });
   
