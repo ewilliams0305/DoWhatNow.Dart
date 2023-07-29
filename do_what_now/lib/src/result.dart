@@ -1,58 +1,65 @@
 import 'error.dart';
+import 'result_state.dart';
 
-/// The result type is the result of a method call.
-/// Results can contain either an exception or value of the specified type <T>
-/// Results use a status enum reporting either pass/fail and can never be both.
-class Result<T> {
-  /// The status of the result.
-  final ResultStatus status;
+/// The [Result] type is the result of a method an object or method.
+/// Results can contain either a List<> of [Error] or value of the specified type <T>
+/// Results use a [ResultState] enum internal to ensure the [Result] can only ever be success or fail.
+class Result<TValue> {
+  /// The value of [TValue] returned from the result.  Will be null unless the result is success.
+  final TValue? value;
 
-  /// This is not yet implemented and will need to aggregate the errors together.
+  /// The captured list of [Error] objects.
+  /// Each time a [Result] instance is processed, the operation may fail.
+  /// When the operation fails the [Error] will be captured and added to the collection or errors.
   final List<Error> errors;
 
-  /// The value returned from the result.  Will be null unless the result is pass.
-  final T? value;
+  /// The state of the result.
+  /// When [ResultState.success] this result instance stores a valid <T> instance.
+  /// When [ResultState.fail] this result instance stores a null value with one or more [Error]s
+  final ResultState state;
 
-  /// The result of the operation was successful
-  bool get isSuccess => status == ResultStatus.pass && errors.isEmpty;
+  /// This result passed and the operation was successful
+  bool get isSuccess => state == ResultState.success;
 
   /// The result of the operation failed and contains errors.
-  bool get isFailure => status == ResultStatus.fail || errors.isNotEmpty;
+  bool get isFailure => state == ResultState.fail;
 
-  /// Creates a new passing result.
-  Result.pass(this.value)
-      : status = ResultStatus.pass,
+  /// Creates a new successful result.
+  Result._success(this.value)
+      : state = ResultState.success,
         errors = List.empty();
 
   /// Creates a new failed result.
-  Result.fail(Error error)
-      : status = ResultStatus.fail,
+  Result._failure(Error error)
+      : state = ResultState.fail,
         value = null,
         errors = [error];
 
-  /// Creates a new failed result.
-  const Result.failures(this.errors)
-      : status = ResultStatus.fail,
+  /// Creates a new failed result containing multiple errors.
+  Result._failures(this.errors)
+      : state = ResultState.fail,
         value = null;
+
+  @override
+  String toString() => isSuccess
+    ? value.toString()
+    : errors.map((e) => e.toString()).toString();
 }
 
-Result<TValue> failure<TValue>(Error error) => Result.fail(error);
+Result<TValue> success<TValue>(TValue value) => Result._success(value);
 
-Result<TValue> failures<TValue>(List<Error> errors) => Result.failures(errors);
+Result<TValue> failure<TValue>(Error error) => Result._failure(error);
+
+Result<TValue> failures<TValue>(List<Error> errors) => Result._failures(errors);
 
 Result<TValue> create<TValue>(TValue value) =>
-    value != null ? success<TValue>(value) : failure<TValue>(Error.empty());
-Result<TValue> success<TValue>(TValue value) => Result.pass(value);
+    value != null ? Result._success(value) : Result._failure(empty<TValue>());
 
-Result<TValue> from<TValue>(
-        TValue value, bool Function(TValue value) predicate) =>
+Result<TValue> from<TValue>(TValue value, bool Function(TValue value) predicate,
+        {String? message}) =>
     predicate(value)
         ? success(value)
-        : failure(Error.message('The resulting predicate failed'));
-
-Result<TValue> ensure<TValue>(
-        TValue value, bool Function(TValue v) predicate, Error error) =>
-    predicate(value) ? success(value) : failure(error);
+        : failure(ErrorMessage(message ?? 'The resulting predicate failed'));
 
 Result<(T1, T2)> combine<T1, T2>(Result<T1> result1, Result<T2> result2) {
   if (result1.isFailure) {
@@ -63,14 +70,4 @@ Result<(T1, T2)> combine<T1, T2>(Result<T1> result1, Result<T2> result2) {
   }
 
   return success((result1.value!, result2.value!));
-}
-
-/// The resuting state of a [Result]
-/// A result can only ever be pass or fail.
-enum ResultStatus {
-  /// The result was successful and passed.
-  pass,
-
-  /// The result failed and stores an exception.
-  fail
 }

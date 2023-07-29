@@ -2,6 +2,7 @@ import 'result.dart';
 import 'error.dart';
 import 'dart:async';
 
+
 extension ResultExtensions<T> on Result<T> {
 
   List<Result> combine(Result result) {
@@ -32,8 +33,8 @@ extension ResultMapsExtensions on Result {
   
   Result<TOut> map<TIn, TOut>(TOut Function(TIn input) mapping) {
     return isSuccess 
-    ? Result.pass(mapping(value)) 
-    : Result.fail(Error.exception(Exception()));
+    ? success(mapping(value)) 
+    : failure(exception(Exception('')));
   }
 }
 
@@ -41,11 +42,11 @@ extension ResultMapperExtensions<TIn> on Result<TIn> {
 
   Result<TOut> mapper<TOut>(TOut Function(TIn input) mapping) =>
     isSuccess 
-    ? Result.pass(mapping(value as TIn))
-    : Result.failures(errors);
+    ? success(mapping(value as TIn))
+    : failures(errors);
 
   Future<Result<TOut>> mapFuture<TOut>(FutureOr<TOut> Function(TIn? value) mappingFunction) async =>
     isSuccess 
-    ? Result<TOut>.pass(await mappingFunction(value))
-    : Result<TOut>.failures(errors);
+    ? success(await mappingFunction(value))
+    : failures(errors);
 }
