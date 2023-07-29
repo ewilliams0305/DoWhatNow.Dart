@@ -9,7 +9,7 @@
 
 A Result package for Dart (and Flutter of course) designed around fluent APIs and a functional approach to error handling, because things go wrong!
 This package will help you process the `DO` without verbosity while forgetting all about the `WHAT`.  
-The `DO` being the happy path an application may take, and the `WHAT` being short for `WTF`.  Complete your process and find out what went wrong and what went wrong.
+The `DO` being the happy path an application may take, and the `WHAT` being short for `WTF`.  Complete your process OR find out what went wrong.
 
 ![Do What Now?](do_what_now/DoWhat.PNG)
 
