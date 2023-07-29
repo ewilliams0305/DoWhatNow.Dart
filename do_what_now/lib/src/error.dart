@@ -99,7 +99,7 @@ extension ErrorsListExtension on List<Error> {
   /// Useful when displaying a list of validation errors is desirable.
   String displayErrors() => isEmpty
       ? ''
-      : map((error) => error.toString()).join('\n');
+      : map((error) => error.toString()).join(' | ');
   
   /// Creates a map of errors containing the ordered index of each [Error] as it was created.
   /// usefull when serializing [Error] messages.

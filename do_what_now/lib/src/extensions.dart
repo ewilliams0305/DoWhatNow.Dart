@@ -83,6 +83,21 @@ extension ResultExtensions<TValue> on Result<TValue> {
     isSuccess 
     ? success(mapping(value as TValue))
     : failures(errors);
+
+  /// The [mapster] method is identicle to the [map] method however it wrap your conversion method in a [try] [catch]
+  Result<TOut> mapster<TOut>(TOut Function(TValue input) mapping){
+    try{
+      return isSuccess 
+      ? success(mapping(value as TValue))
+      : failures(errors);
+    } 
+    on Exception catch (exception){
+      return failures([...errors, ErrorException(exception)]);
+    }
+    catch (object) {
+      return failures([...errors, ErrorObject(object)]);
+    }
+  }
   
   /// The [async] [Future] compatible version of the [map] function.
   Future<Result<TOut>> mapFuture<TOut>(FutureOr<TOut> Function(TValue value) mappingFunction) async =>
