@@ -1,5 +1,4 @@
 import 'package:do_what_now/do_what_now.dart';
-import 'package:do_what_now/src/extensions.dart';
 import 'package:test/test.dart';
 
 void main() {
