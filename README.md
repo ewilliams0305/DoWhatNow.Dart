@@ -23,6 +23,12 @@ The `DO` being the happy path an application may take, and the `WHAT` being shor
 located in the lib/src directory you will find a few files explained below.
 
 
+'src/result.dart';
+'src/result_state.dart';
+'src/error.dart';
+export 'src/error_reason.dart';
+export 'src/extensions.dart';
+
 ## Result
 
 ## Errors

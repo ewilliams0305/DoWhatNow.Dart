@@ -108,7 +108,7 @@ void main() {
 
     test('Ensure does not process Error', () {
       final result =
-          create<String?>(null).ensure((value) => false, ErrorEmpty());
+          create<String?>(null).ensure((value) => false, WhatEmpty());
 
       print(result.toString());
 
@@ -140,7 +140,7 @@ void main() {
 
     test('Ensure creates successfull result from String', () {
       final result =
-          create('hello').ensure((value) => value == 'hello', ErrorEmpty());
+          create('hello').ensure((value) => value == 'hello', WhatEmpty());
 
       expect(result.isSuccess, isTrue);
       expect(result.value == 'hello', isTrue);
@@ -220,25 +220,25 @@ void main() {
 
   group('ErrorEmpty Tests', () {
     test('Test ErrorEmpty for String', () {
-      final errorString = ErrorEmpty<String>();
+      final errorString = WhatEmpty<String>();
       expect(errorString.toString(), 'String is NULL');
     });
 
     test('Test ErrorEmpty for int', () {
-      final errorInt = ErrorEmpty<int>();
+      final errorInt = WhatEmpty<int>();
       expect(errorInt.toString(), 'int is NULL');
     });
 
     test('Test ErrorEmpty for custom class', () {
-      final errorCustom = ErrorEmpty<CustomClass>();
+      final errorCustom = WhatEmpty<CustomClass>();
       expect(errorCustom.toString(), 'CustomClass is NULL');
     });
 
     test('Test ErrorEmpty isEmpty property', () {
-      final emptyError = ErrorEmpty<int>();
-      final messageError = ErrorMessage('');
-      final exceptionError = ErrorException(Exception());
-      final objectError = ErrorObject('');
+      final emptyError = WhatEmpty<int>();
+      final messageError = WhatMessage('');
+      final exceptionError = WhatException(Exception());
+      final objectError = WhatObject('');
 
       expect(emptyError.isEmpty, isTrue);
       expect(messageError.isEmpty, isFalse);
@@ -247,32 +247,32 @@ void main() {
     });
 
     test('Test ErrorEmpty isMessage property', () {
-      final emptyError = ErrorEmpty<int>();
+      final emptyError = WhatEmpty<int>();
       expect(emptyError.isMessage, isFalse);
     });
 
     test('Test ErrorEmpty isObject property', () {
-      final emptyError = ErrorEmpty<int>();
+      final emptyError = WhatEmpty<int>();
       expect(emptyError.isObject, isFalse);
     });
 
     test('Test ErrorEmpty isException property', () {
-      final emptyError = ErrorEmpty<int>();
+      final emptyError = WhatEmpty<int>();
       expect(emptyError.isException, isFalse);
     });
   });
 
   group('MessageError Tests', () {
     test('Test MessageError for String', () {
-      final errorMessage = ErrorMessage('message');
+      final errorMessage = WhatMessage('message');
       expect(errorMessage.toString(), 'message');
     });
 
     test('Test MessageError isMessage property', () {
-      final messageError = ErrorMessage('');
-      final emptyError = ErrorEmpty<int>();
-      final exceptionError = ErrorException(Exception());
-      final objectError = ErrorObject('');
+      final messageError = WhatMessage('');
+      final emptyError = WhatEmpty<int>();
+      final exceptionError = WhatException(Exception());
+      final objectError = WhatObject('');
 
       expect(messageError.isMessage, isTrue);
       expect(emptyError.isMessage, isFalse);
@@ -281,37 +281,37 @@ void main() {
     });
 
     test('Test MessageError isMessage property', () {
-      final messageError = ErrorMessage('');
+      final messageError = WhatMessage('');
       expect(messageError.isEmpty, isFalse);
     });
 
     test('Test MessageError isObject property', () {
-      final messageError = ErrorMessage('');
+      final messageError = WhatMessage('');
       expect(messageError.isObject, isFalse);
     });
 
     test('Test MessageError isException property', () {
-      final messageError = ErrorMessage('');
+      final messageError = WhatMessage('');
       expect(messageError.isException, isFalse);
     });
   });
 
   group('ErrorObject Tests', () {
     test('Test ErrorObject for String', () {
-      final objectError = ErrorObject(Exception('message'));
+      final objectError = WhatObject(Exception('message'));
       expect(objectError.toString(), 'Exception: message');
     });
 
     test('Test ErrorObject for CustomerType', () {
-      final objectError = ErrorObject(CustomerErrorMessage());
+      final objectError = WhatObject(CustomerErrorMessage());
       expect(objectError.toString(), 'Custom');
     });
 
     test('Test ErrorObject isObject property', () {
-      final objectError = ErrorObject(Exception());
-      final messageError = ErrorMessage('');
-      final emptyError = ErrorEmpty<int>();
-      final exceptionError = ErrorException(Exception());
+      final objectError = WhatObject(Exception());
+      final messageError = WhatMessage('');
+      final emptyError = WhatEmpty<int>();
+      final exceptionError = WhatException(Exception());
 
       expect(objectError.isObject, isTrue);
       expect(messageError.isObject, isFalse);
@@ -320,32 +320,32 @@ void main() {
     });
 
     test('Test ErrorObject isMessage property', () {
-      final objectError = ErrorObject(Exception());
+      final objectError = WhatObject(Exception());
       expect(objectError.isEmpty, isFalse);
     });
 
     test('Test ErrorObject isObject property', () {
-      final objectError = ErrorObject(Exception());
+      final objectError = WhatObject(Exception());
       expect(objectError.isMessage, isFalse);
     });
 
     test('Test ErrorObject isException property', () {
-      final objectError = ErrorObject(Exception());
+      final objectError = WhatObject(Exception());
       expect(objectError.isException, isFalse);
     });
   });
 
   group('ErrorException Tests', () {
     test('Test ErrorException for String', () {
-      final exceptionError = ErrorException(Exception('message'));
+      final exceptionError = WhatException(Exception('message'));
       expect(exceptionError.toString(), 'Exception: message');
     });
 
     test('Test ErrorException isObject property', () {
-      final exceptionError = ErrorException(Exception());
-      final messageError = ErrorMessage('');
-      final emptyError = ErrorEmpty<int>();
-      final objectError = ErrorObject(Exception());
+      final exceptionError = WhatException(Exception());
+      final messageError = WhatMessage('');
+      final emptyError = WhatEmpty<int>();
+      final objectError = WhatObject(Exception());
 
       expect(exceptionError.isException, isTrue);
       expect(messageError.isException, isFalse);
@@ -354,17 +354,17 @@ void main() {
     });
 
     test('Test ErrorException isEmpty property', () {
-      final exceptionError = ErrorException(Exception());
+      final exceptionError = WhatException(Exception());
       expect(exceptionError.isEmpty, isFalse);
     });
 
     test('Test ErrorException isMessage property', () {
-      final exceptionError = ErrorException(Exception());
+      final exceptionError = WhatException(Exception());
       expect(exceptionError.isMessage, isFalse);
     });
 
     test('Test ErrorException isObject property', () {
-      final exceptionError = ErrorException(Exception());
+      final exceptionError = WhatException(Exception());
       expect(exceptionError.isObject, isFalse);
     });
   });
