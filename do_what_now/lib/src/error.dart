@@ -42,7 +42,7 @@ abstract class Error<TError> {
 /// [ErrorEmpty] provides a default error to handle NULL refernces.
 class ErrorEmpty<TValue> extends Error<String> {
 
-  ErrorEmpty():super(ErrorReason.empty, '${TValue.runtimeType} is NULL');
+  ErrorEmpty():super(ErrorReason.empty, '${TValue.toString()} is NULL');
   
   @override
   String _getMessage() => error!;
@@ -51,7 +51,7 @@ class ErrorEmpty<TValue> extends Error<String> {
 /// [ErrorMessage] stores a custom string provided to the [Result]
 class ErrorMessage extends Error<String> {
 
-  ErrorMessage(String message):super(ErrorReason.empty, message);
+  ErrorMessage(String message):super(ErrorReason.message, message);
   
   @override
   String _getMessage() => error!;
