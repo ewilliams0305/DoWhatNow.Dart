@@ -366,6 +366,66 @@ void main() {
       expect(exceptionError.isObject, isFalse);
     });
   });
+
+  group('Intigration Tests', () {
+
+    test('Verify Create can Ensure and Map to Result', () {
+      final doWhat = create<String>('http://getusers')                              
+        .ensure(
+          (url) => url.startsWith('http://'),                     
+          (url) => message('$url does not start with http://'))    
+        .tryMap<HttpResponse>((url) => getRequest(url))                           
+        .ensure(
+          (httpResponse) => httpResponse.statusCode == 200,       
+          (httpResponse) => message('Status Code ${httpResponse.statusCode}'))
+        .ensure(
+          (httpResponse) => httpResponse.body != null,                     
+          (httpResponse) => message('Http response contains no data'))
+        .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!));  
+      expect(doWhat.isSuccess, isTrue);
+      expect(doWhat.value != null, isTrue);
+      expect(doWhat.value!.name == 'some thing', isTrue);
+    });
+    
+    test('Verify Create can Ensure and Map to Error', () {
+      final doWhat = create<String>('http://getusers')                              
+      .ensure(
+        (url) => url.startsWith('http://'),                     
+        (url) => message('$url does not start with http://'))  
+      .tryMap<HttpResponse>((url) => getRequest(''))                      
+      .ensure(
+        (httpResponse) => httpResponse.statusCode == 200,       
+        (httpResponse) => message('Status Code ${httpResponse.statusCode}'))
+      .ensure(
+        (httpResponse) => httpResponse.body != null,                      
+        (httpResponse) => message('Http response contains no data'))
+      .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!)); 
+
+      expect(doWhat.isFailure, isTrue);
+      expect(doWhat.value == null, isTrue);
+      expect(doWhat.errors.isNotEmpty, isTrue);
+    });
+   
+    test('Verify Create can Ensure and Map to Exception', () {
+      final doWhat = create<String>('http://getusers')                              
+      .ensure(
+        (url) => url.startsWith('http://'),                     // Validate
+        (url) => message('$url does not start with http://'))   // Provide Error  
+      .tryMap<HttpResponse>((url) => throwGetRequest(''))       // throws exception            
+      .ensure(
+        (httpResponse) => httpResponse.statusCode == 200,       // Validate
+        (httpResponse) => message('Status Code ${httpResponse.statusCode}'))
+      .ensure(
+        (httpResponse) => httpResponse.body != null,                      // Validate
+        (httpResponse) => message('Http response contains no data'))
+      .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!));
+
+      expect(doWhat.isFailure, isTrue);
+      expect(doWhat.value == null, isTrue);
+      expect(doWhat.errors.isNotEmpty, isTrue);
+      expect(doWhat.errors[0] is WhatException, isTrue);
+    });
+  });
 }
 
 class CustomClass {}
@@ -376,3 +436,67 @@ class CustomerErrorMessage {
     return 'Custom';
   }
 }
+
+
+HttpResponse getRequest(String url, {String? name}) =>
+  url.isNotEmpty 
+  ? HttpResponse(200, {'email':'something@something.com', 'name': name?? 'some thing'})
+  : HttpResponse(400, null);
+
+HttpResponse throwGetRequest(String url) =>
+  url.isNotEmpty 
+  ? HttpResponse(200, {'email':'something@something.com', 'name': 'some thing'})
+  : throw Exception(ArgumentError(url));
+
+HttpResponse postRequest(String url) =>
+  url.isNotEmpty 
+  ? HttpResponse(200, {})
+  : HttpResponse(400, null);
+
+
+class HttpResponse {
+  final int statusCode;
+  final Map<String, dynamic>? body;
+  
+  const HttpResponse(this.statusCode, this.body);
+}
+
+class User {
+  final String name;
+  final String email;
+
+  bool eaten;
+
+  User(this.email, this.name): eaten = false;
+
+  factory User.fromMap(Map<String, dynamic> map) =>
+    User(
+      map['email'] as String, 
+      map['name'] as String);
+
+  @override
+  String toString() {
+    return 'name: $name, email: $email';
+  }
+}
+
+class Villian {
+  
+  final User user1;
+  final User user2;
+
+  final String ominousMessage;
+
+  factory Villian.eatUsers(User user1, User user2) {
+    user1.eaten = true;
+    user2.eaten = true;
+
+    return Villian._create(user1, user2);
+  }
+
+    Villian._create(this.user1, this.user2):ominousMessage = 'I have eaten ${user1.name} and ${user2.name}!';
+
+    @override
+    String toString() => ominousMessage;
+    
+  }
