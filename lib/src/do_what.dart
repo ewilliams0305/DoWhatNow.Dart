@@ -41,9 +41,7 @@ class DoWhat<TValue> {
         value = null;
 
   @override
-  String toString() => isSuccess
-    ? value.toString()
-    : errors.displayErrors();
+  String toString() => isSuccess ? value.toString() : errors.displayErrors();
 }
 
 /// Factory method to create a new Successful [DoWhat]
@@ -63,14 +61,14 @@ DoWhat<TValue> create<TValue>(TValue value) =>
 /// Factory method to create a new [DoWhat]
 /// The [from] method will evaluate the value and execute the predicate.
 /// The [DoWhat] will be successfull if the callers predicate returns true.
-/// 
+///
 /// Example returning valid successfull result.
 /// ```
 /// final result = from(12, (value) => value == 12));
 /// result.isSuccess // true
 /// ```
-/// 
-/// Example returning invald failure result. 
+///
+/// Example returning invald failure result.
 /// ```
 /// final result = from(13, (value) => value == 12));
 /// result.isSuccess // false
