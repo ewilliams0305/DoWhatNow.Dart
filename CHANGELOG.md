@@ -11,3 +11,6 @@
 
 ## 1.0.3
 - Created complex examples and updated readme
+
+## 1.0.4
+- Ensure or extension method provides non-nullable value instance to the lambda
