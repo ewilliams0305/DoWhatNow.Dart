@@ -11,9 +11,9 @@ extension ResultExtensions<TValue> on DoWhat<TValue> {
   /// When the result is a success the [TValue] instance will be passed to the success function.
   ///
   /// Each use case is expected to return a new [DoWhat]
-  DoWhat<TValue> or(DoWhat<TValue> Function(TValue? value) success,
+  DoWhat<TValue> or(DoWhat<TValue> Function(TValue value) success,
           DoWhat<TValue> Function(List<What> errors) error) =>
-      isSuccess ? success(value) : error(errors);
+      isSuccess ? success(value as TValue) : error(errors);
 
   /// The [ensure] method validates a state of the [Result] [TValue] instance.
   /// Ensure will call you predicate if and only if the result is successfully.

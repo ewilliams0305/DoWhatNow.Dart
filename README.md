@@ -141,7 +141,7 @@ The following code snip demonstrates how we could handle an HTTP request (not th
   
 ```
 
-#### Returning From a Mthod
+#### Returning From a Function
 Of course like all things dart, we can return a DoWhat from an function.  This provides a fluent API to chain functions together.  The `combine` example below calls two methods that return a DoWhat.  The results are combined as a Tuple and evaluated.  If the returned results are valid, both users are Eaten and a SuperVillian is created. 
 
 ```dart
