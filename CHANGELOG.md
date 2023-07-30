@@ -8,3 +8,6 @@
 ## 1.0.2
 - Nothing API related.
 - Added GitHub Actions.
+
+## 1.0.3
+- Created complex examples and updated readme

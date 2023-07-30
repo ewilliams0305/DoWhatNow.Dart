@@ -10,8 +10,19 @@
 A Result package for Dart (and Flutter of course) designed around fluent APIs and a functional approach to error handling, because things go wrong!
 This package will help you process the `DO` without verbosity while forgetting all about the `WHAT`.  
 The `DO` being the happy path an application may take, and the `WHAT` being short for `WTF`.  Complete your process OR find out what went wrong.
-
-![Do What Now?](DoWhat.PNG)
+```dart
+  final doWhat = combine(
+    getUserAccount('apple'), 
+    getUserAccount('bannana'))
+    .ensure(
+      (users) => users.$1.name == 'apple' && users.$2.name == 'bannana', 
+      (users) => message('One or More Users are Not Value'))
+    .map<Villian>((users) => Villian.eatUsers(users.$1, users.$2))
+    .ensure(
+      (villian) => villian.user1.eaten && villian.user2.eaten, 
+      (villian) => message('The villian didn\'t eat the users'));
+```
+![Do What Now?](https://raw.githubusercontent.com/ewilliams0305/DoWhatNow.Dart/main/DoWhat.PNG)
 
 ## Table of Contents
 1. [Files](#The-Files)
@@ -19,7 +30,6 @@ The `DO` being the happy path an application may take, and the `WHAT` being shor
 3. [What](#The-What-Object)
 4. [Extension Methods](#Extension-Methods)
 5. [Usage](#DoWhat-Usage)
-6. [Errors](Handling-Errors)
 
 ## The Files
 located in the lib/src directory you will find a few files exported by this library.
@@ -87,14 +97,83 @@ final doWhat = failure(message('This is a Failed thing'));
 ```
 
 ## The What Object
-Stores the failures.  Failures can be as complex as required.  A What is an abstract class, several concrete `What`s have been provided for you that store.  
+Stores the failures.  Failures can be as complex as required.  A What is an abstract class, several concrete `What`s have been provided for you that store either messages, exceptions, and objects.  Factory methods have been provided to streamline the API.
 
+Create (or use a provided implmentation) a class the `implements` or `extends` the `What` class.  
+```dart
+class WhatMessage extends What<String> {
+  WhatMessage(String message) : super(Why.message, message);
+  @override
+  String _getMessage() => error!;
+}
+
+WhatMessage message(String message) => WhatMessage(message);
+```
+Provide this new `What` to the results of an error lambda.
+```dart
+final doWhat = create<String>('http://getusers')                              
+    .ensure(
+      (url) => url.startsWith('http://'),                   
+      (url) => message('$url does not start with http://'))        
+```
 ## Extension Methods
 
 
 ## DoWhat Usage
 So whats the point.  Well now you have a `DoWhat` and you can use this as a return type on potentially destructive methods.  The `DoWhat` will allow you to gracfully handle these errors, process the results, return messages to UI, while manintaining readability. Below are some complex use cases.
 
-## Handling Errors
+#### Sanitizing Inputs
+The following code snip demonstrates how we could handle an HTTP request (not this is not async delibratly to provide a simply example).  We will start by sanitizing the input to our method.  Right away the result will be a failure if the URL is null, we then validate the string starts with a proper http:// prefix.  We then map it to a HTTP Reponse.  At ths point the `DoWhat` has mutated to a `DoWhat<HttpResponse>`.  Imediatly validate a returned 200 and `ensure` the body response is not empty.  After completly sanitixing things we can map it to a User.
 
+```dart
+  final doWhat = create<String>('http://getusers')                              
+    .ensure(
+      (url) => url.startsWith('http://'),                     // Validate
+      (url) => message('$url does not start with http://'))   // Provide Error  
+    .tryMap<HttpResponse>((url) => getRequest(url))           // Convert                 
+    .ensure(
+      (httpResponse) => httpResponse.statusCode == 200,       // Validate
+      (httpResponse) => message('Status Code ${httpResponse.statusCode}'))
+    .ensure(
+      (httpResponse) => httpResponse.body != null,                      // Validate
+      (httpResponse) => message('Http response contains no data'))
+    .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!));  //When KNOW the body is NOT Null!
+  
+```
 
+#### Returning From a Mthod
+Of course like all things dart, we can return a DoWhat from an function.  This provides a fluent API to chain functions together.  The `combine` example below calls two methods that return a DoWhat.  The results are combined as a Tuple and evaluated.  If the returned results are valid, both users are Eaten and a SuperVillian is created. 
+
+```dart
+void combineExample(){
+
+  final doWhat = combine(
+    getUserAccount('apple'), 
+    getUserAccount('bannana'))
+    .ensure(
+      (users) => users.$1.name == 'apple' && users.$2.name == 'bannana', 
+      (users) => message('One or More Users are Not Value'))
+    .map<Villian>((users) => Villian.eatUsers(users.$1, users.$2))
+    .ensure(
+      (villian) => villian.user1.eaten && villian.user2.eaten, 
+      (villian) => message('The villian didn\'t eat the users'));
+
+    print(doWhat);
+}
+
+DoWhat<User> getUserAccount(String name) =>
+  create(name)
+    .map<String>((name) => 'http://getusers/$name')                              
+    .ensure(
+      (url) => url.startsWith('http://'),                     
+      (url) => message('$url does not start with http://'))    
+    .tryMap<HttpResponse>((url) => getRequest(url, name: name))                           
+    .ensure(
+      (httpResponse) => httpResponse.statusCode == 200,       
+      (httpResponse) => message('Status Code ${httpResponse.statusCode}'))
+    .ensure(
+      (httpResponse) => httpResponse.body != null,                      
+      (httpResponse) => message('Http response contains no data'))
+    .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!));  
+
+```
