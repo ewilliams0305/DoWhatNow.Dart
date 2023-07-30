@@ -7,13 +7,6 @@ import 'do_state.dart';
 /// These methods allow users to safely chain together [DoWhat]s and safely continue on either the happy path or the sad path.
 extension ResultExtensions<TValue> on DoWhat<TValue> {
 
-  /// Combines two [DoWhat] instances as a Single [DoWhat]
-  /// When both results are [DoState.success] the [DoWhat] will become a Successful result.
-  List<DoWhat> combine(DoWhat result) {
-    final List<DoWhat> results = [result, this];
-    return results;
-  }
-
   /// Provides a handler for each case of the Result instance.
   /// When the result is a failure the [What]s list will be passed to the [errors] function.
   /// When the result is a success the [TValue] instance will be passed to the success function.
@@ -31,11 +24,11 @@ extension ResultExtensions<TValue> on DoWhat<TValue> {
   /// When the prdicate returns true the result is considered successfull.
   /// 
   /// This functional is primarily used for validation. 
-  DoWhat<TValue> ensure(bool Function(TValue? value) predicate, What error) =>
-    isSuccess 
-      ? predicate(value) 
+  DoWhat<TValue> ensure(bool Function(TValue value) predicate, What Function(TValue value) error ) =>
+    isSuccess && value != null
+      ? predicate(value as TValue) 
         ? success(value as TValue)
-        : failure(error)
+        : failure(error(value as TValue))
       :failures(errors);
 
   /// Provides an inline function to access the value of the [TValue] instance.
@@ -56,6 +49,34 @@ extension ResultExtensions<TValue> on DoWhat<TValue> {
     }
 
     return result;
+  } 
+  
+  /// Provides an inline function to access the value of the [TValue] instance and wraps it in a try catch.
+  /// Process whatever logic you need to and return a result.  
+  /// [tap] will only invoke you function if the [DoWhat] is successfull.
+  /// When the result is a failure it will simply return the current state back to the invocation.
+  /// 
+  /// Should the [tap] process callback return an error, the [What] will be added to the [DoWhat] errors and returned.
+  DoWhat<TValue> tryTap(DoWhat<TValue> Function(TValue value) process){
+    if(isFailure){
+      return failures(errors);
+    }
+
+    try {
+
+      final result = process(value as TValue);
+
+      if(result.isFailure){
+        return failures([...errors, ...result.errors]);
+      }
+        return result;
+        
+    }  on Exception catch (exception){
+      return failures([...errors, WhatException(exception)]);
+    }
+    catch (object) {
+      return failures([...errors, WhatObject(object)]);
+    }
   } 
   
   /// The [async] [Future] compatible version of the [tap] function.
@@ -84,8 +105,8 @@ extension ResultExtensions<TValue> on DoWhat<TValue> {
     ? success(mapping(value as TValue))
     : failures(errors);
 
-  /// The [mapster] method is identicle to the [map] method however it wrap your conversion method in a [try] [catch]
-  DoWhat<TOut> mapster<TOut>(TOut Function(TValue input) mapping){
+  /// The [tryMap] method is identicle to the [map] method however it wrap your conversion method in a [try] [catch]
+  DoWhat<TOut> tryMap<TOut>(TOut Function(TValue input) mapping){
     try{
       return isSuccess 
       ? success(mapping(value as TValue))
@@ -104,4 +125,10 @@ extension ResultExtensions<TValue> on DoWhat<TValue> {
     isSuccess 
     ? success(await mappingFunction(value as TValue))
     : failures(errors);
+
+  /// Combines two [DoWhat] instances as a Single [DoWhat]
+  /// When both results are [DoState.success] the [DoWhat] will become a Successful result.
+  DoWhat<(TValue, TCombinedValue)> augment<TCombinedValue>(DoWhat<TCombinedValue> doWhat) => 
+    combine(this, doWhat);
+
 }

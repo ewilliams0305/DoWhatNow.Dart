@@ -107,7 +107,7 @@ void main() {
 
     test('Ensure does not process Error', () {
       final result =
-          create<String?>(null).ensure((value) => false, WhatEmpty());
+          create<String?>(null).ensure((value) => false, (err) => WhatEmpty());
 
       print(result.toString());
 
@@ -117,7 +117,7 @@ void main() {
 
     test('Ensure adds Error', () {
       final result = create<String>('hello').ensure(
-          (value) => value == 'hello!', message('Hello Does Not Equate'));
+          (value) => value == 'hello!', (err) => message('Hello Does Not Equate'));
 
       print(result.toString());
 
@@ -127,9 +127,9 @@ void main() {
 
     test('Ensure adds Mulitple Errors', () {
       final result = create<String>('hello')
-          .ensure((value) => value == 'hello', message('Hello Does Not Equate'))
+          .ensure((value) => value == 'hello', (err) => message('Hello Does Not Equate'))
           .ensure(
-              (value) => value == 'hello!', message('Hello Does Not Equate'));
+              (value) => value == 'hello!', (err) => message('Hello Does Not Equate'));
 
       print(result.toString());
 
@@ -139,7 +139,7 @@ void main() {
 
     test('Ensure creates successfull result from String', () {
       final result =
-          create('hello').ensure((value) => value == 'hello', WhatEmpty());
+          create('hello').ensure((value) => value == 'hello', (err) => WhatEmpty());
 
       expect(result.isSuccess, isTrue);
       expect(result.value == 'hello', isTrue);
@@ -149,7 +149,7 @@ void main() {
   group('map() result tests', () {
     test('Map does not process errors', () {
       final result = create<String>('1')
-          .ensure((value) => value == '2', message('Value not equal 2'))
+          .ensure((value) => value == '2', (err) => message('Value not equal 2'))
           .map<int>((input) => int.parse(input));
 
       print(result.toString());
@@ -158,7 +158,7 @@ void main() {
 
     test('Map does not processor errors', () {
       final result = create<String>('1')
-          .ensure((value) => value == '2', message('Value not equal 2'))
+          .ensure((value) => value == '2', (err) => message('Value not equal 2'))
           .map<int>((input) => int.parse(input));
 
       print(result.toString());
@@ -167,7 +167,7 @@ void main() {
 
     test('Map converts String to Int', () {
       final result = create<String>('1')
-          .ensure((value) => value == '1', message('Value not equal 1'))
+          .ensure((value) => value == '1', (err) => message('Value not equal 1'))
           .map<int>((input) => int.parse(input));
 
       print(result.toString());
@@ -178,7 +178,7 @@ void main() {
   group('mapster() result tests', () {
     test('Mapster return exception as Error Result', () {
       final result = create<String>('A')
-          .mapster<int>((input) => int.parse(input));
+          .tryMap<int>((input) => int.parse(input));
 
       print(result.toString());
       expect(result.isFailure, isTrue);
@@ -186,7 +186,7 @@ void main() {
     
     test('Mapster return success Result', () {
       final result = create<String>('1')
-          .mapster<int>((input) => int.parse(input));
+          .tryMap<int>((input) => int.parse(input));
 
       print(result.toString());
       expect(result.isSuccess, isTrue);
@@ -199,7 +199,7 @@ void main() {
 
       final result = create<int>(10)
           .tap((original) => from(original + 10, (tapped) => tapped == 20))
-          .ensure((value) => value == 20, message('Value is NOT equal to 20'));
+          .ensure((value) => value == 20, (err) => message('Value is NOT equal to 20'));
 
       print(result.toString());
       expect(result.isSuccess, isTrue);
@@ -208,7 +208,7 @@ void main() {
     
     test('Mapster return success Result', () {
       final result = create<String>('1')
-          .mapster<int>((input) => int.parse(input));
+          .tryMap<int>((input) => int.parse(input));
 
       print(result.toString());
       expect(result.isSuccess, isTrue);
