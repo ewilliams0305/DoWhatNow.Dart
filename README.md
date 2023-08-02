@@ -177,3 +177,17 @@ DoWhat<User> getUserAccount(String name) =>
     .tryMap<User>((httpResponse) => User.fromMap(httpResponse.body!));  
 
 ```
+DoWhat can also be used for async operations 
+```dart
+Future<DoWhat<Uint8List>> getImage(String imageId) async =>
+      await AppkitRestApi.instance.getApi('images/$imageId')
+        .then((response) => response
+          .ensure(
+            (response) => response.statusCode == 200,
+            (response) => what(response))
+          .ensure(
+            (response) => response.bodyBytes.isNotEmpty, 
+            (response) => message('Image response body contains ZERO bytes'))
+          .map<Uint8List>((input) => input.bodyBytes));
+```
+
